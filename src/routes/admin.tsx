@@ -21,7 +21,7 @@ export const Route = createFileRoute("/admin")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: AdminPage;
+  component: AdminPage,
 });
 
 type SortKey = "investor_name" | "sectors" | "stages" | "check_size_max" | "submitted_at";
