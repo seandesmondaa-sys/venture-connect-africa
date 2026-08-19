@@ -5,14 +5,14 @@ const submissionSchema = z.object({
   investor_name: z.string().trim().min(1).max(160),
   contact_email: z.string().trim().email().max(255),
   sectors: z.array(z.string().max(60)).max(20),
-  sector_notes: z.string().trim().max(500).optional().nullable(),
+  sector_notes: z.string().trim().max(500).nullish().transform((v) => v ?? null),
   stages: z.array(z.string().max(40)).max(10),
   check_size_min: z.number().int().min(0).max(1_000_000_000),
   check_size_max: z.number().int().min(0).max(1_000_000_000),
   deal_priorities: z.array(z.string().max(60)).max(10),
   geographies_focus: z.array(z.string().max(60)).max(30),
-  geographies_avoid: z.string().trim().max(500).optional().nullable(),
-  process_notes: z.string().trim().max(1000).optional().nullable(),
+  geographies_avoid: z.string().trim().max(500).nullish().transform((v) => v ?? null),
+  process_notes: z.string().trim().max(1000).nullish().transform((v) => v ?? null),
 });
 
 export type SubmissionInput = z.infer<typeof submissionSchema>;
