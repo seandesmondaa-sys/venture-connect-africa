@@ -157,3 +157,33 @@
     color: var(--color-foreground);
   }
 }
+
+.dark {
+  --gold: oklch(0.78 0.13 79);
+  --gold-foreground: oklch(0.2 0.04 80);
+  --surface: oklch(0.18 0.03 158);
+  --surface-foreground: oklch(0.96 0.012 110);
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+}
+
+@utility surface-panel {
+  background: var(--gradient-deep);
+  color: var(--color-surface-foreground);
+}
+
+@utility card-elevated {
+  box-shadow: var(--shadow-card);
+}
