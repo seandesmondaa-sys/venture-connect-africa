@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      investor_submissions: {
+        Row: {
+          check_size_max: number
+          check_size_min: number
+          contact_email: string
+          deal_priorities: string[]
+          geographies_avoid: string | null
+          geographies_focus: string[]
+          id: string
+          investor_name: string
+          process_notes: string | null
+          sector_notes: string | null
+          sectors: string[]
+          stages: string[]
+          submitted_at: string
+        }
+        Insert: {
+          check_size_max?: number
+          check_size_min?: number
+          contact_email: string
+          deal_priorities?: string[]
+          geographies_avoid?: string | null
+          geographies_focus?: string[]
+          id?: string
+          investor_name: string
+          process_notes?: string | null
+          sector_notes?: string | null
+          sectors?: string[]
+          stages?: string[]
+          submitted_at?: string
+        }
+        Update: {
+          check_size_max?: number
+          check_size_min?: number
+          contact_email?: string
+          deal_priorities?: string[]
+          geographies_avoid?: string | null
+          geographies_focus?: string[]
+          id?: string
+          investor_name?: string
+          process_notes?: string | null
+          sector_notes?: string | null
+          sectors?: string[]
+          stages?: string[]
+          submitted_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
