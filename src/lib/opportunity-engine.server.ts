@@ -503,8 +503,8 @@ export async function getOpportunityDetail(opportunityId: string) {
   if (opportunity.error) throw new Error(opportunity.error.message);
 
   const order = new Map(FIELD_KEYS.map((k, i) => [k, i]));
-  const sortedFields = ((fields.data ?? []) as AnyRecord[]).sort(
-    (a, b) => (order.get(String(a["field_key"])) ?? 99) - (order.get(String(b["field_key"])) ?? 99),
+  const sortedFields = [...(fields.data ?? [])].sort(
+    (a, b) => (order.get(a.field_key) ?? 99) - (order.get(b.field_key) ?? 99),
   );
 
   return {
