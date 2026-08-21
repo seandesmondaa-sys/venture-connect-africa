@@ -7,7 +7,7 @@ function ScoreDial({
 }: {
   label: string;
   score: number | null | undefined;
-  caption?: string;
+  caption?: string | undefined;
 }) {
   return (
     <div className="rounded-xl border border-border bg-card p-5">
