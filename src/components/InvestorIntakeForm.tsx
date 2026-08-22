@@ -16,6 +16,7 @@ import {
   formatUsd,
   type InvestorSubmission,
 } from "@/lib/intake-options";
+import { HORIZONS, INSTRUMENTS, INVESTOR_TYPES } from "@/lib/ac-framework";
 import { submitInvestorIntake } from "@/lib/investors.functions";
 
 function Section({
@@ -64,6 +65,13 @@ export function InvestorIntakeForm({
   const [regions, setRegions] = useState<string[]>([]);
   const [avoid, setAvoid] = useState("");
   const [process, setProcess] = useState("");
+  const [website, setWebsite] = useState("");
+  const [investorType, setInvestorType] = useState("");
+  const [instruments, setInstruments] = useState<string[]>([]);
+  const [horizon, setHorizon] = useState("");
+  const [dueDiligence, setDueDiligence] = useState("");
+  const [requiredDocuments, setRequiredDocuments] = useState("");
+  const [preferredContact, setPreferredContact] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -102,6 +110,16 @@ export function InvestorIntakeForm({
           geographies_focus: regions,
           geographies_avoid: avoid.trim() || null,
           process_notes: process.trim() || null,
+          website: website.trim() || null,
+          investor_type: investorType || null,
+          countries: [],
+          instruments,
+          investment_horizon: horizon || null,
+          screening_process: null,
+          due_diligence_process: dueDiligence.trim() || null,
+          decision_process: null,
+          required_documents: requiredDocuments.trim() || null,
+          preferred_contact: preferredContact.trim() || null,
         },
       });
       onSubmitted(row as InvestorSubmission);
@@ -139,6 +157,32 @@ export function InvestorIntakeForm({
               onChange={(e) => setEmail(e.target.value)}
               placeholder="deals@fund.com"
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="website">Website (optional)</Label>
+            <Input
+              id="website"
+              value={website}
+              maxLength={255}
+              onChange={(e) => setWebsite(e.target.value)}
+              placeholder="fund.com"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="investor-type">Investor type</Label>
+            <select
+              id="investor-type"
+              value={investorType}
+              onChange={(e) => setInvestorType(e.target.value)}
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="">Select…</option>
+              {INVESTOR_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </Section>
@@ -296,6 +340,77 @@ export function InvestorIntakeForm({
             onChange={(e) => setProcess(e.target.value)}
             placeholder="Intro call within a week, then data room review, IC in 4–6 weeks…"
           />
+        </div>
+        <div className="mt-4 space-y-2">
+          <Label htmlFor="dd">Due diligence approach</Label>
+          <Textarea
+            id="dd"
+            rows={3}
+            value={dueDiligence}
+            maxLength={1000}
+            onChange={(e) => setDueDiligence(e.target.value)}
+            placeholder="Commercial and financial DD in-house, legal via external counsel…"
+          />
+        </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="docs">Documents you require up front</Label>
+            <Input
+              id="docs"
+              value={requiredDocuments}
+              maxLength={1000}
+              onChange={(e) => setRequiredDocuments(e.target.value)}
+              placeholder="Deck, 3-year financials, cap table"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="contact">Preferred contact route</Label>
+            <Input
+              id="contact"
+              value={preferredContact}
+              maxLength={255}
+              onChange={(e) => setPreferredContact(e.target.value)}
+              placeholder="Email intro with one-pager"
+            />
+          </div>
+        </div>
+      </Section>
+
+      <Section step={7} title="Instruments & horizon" hint="How you deploy capital.">
+        <div className="flex flex-wrap gap-2">
+          {INSTRUMENTS.map((instrument) => {
+            const active = instruments.includes(instrument);
+            return (
+              <button
+                type="button"
+                key={instrument}
+                onClick={() => setInstruments(toggle(instruments, instrument))}
+                className={`rounded-full border px-3.5 py-2 text-sm transition-colors ${
+                  active
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-background text-foreground hover:bg-secondary"
+                }`}
+              >
+                {instrument}
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-4 space-y-2">
+          <Label htmlFor="horizon">Typical investment horizon</Label>
+          <select
+            id="horizon"
+            value={horizon}
+            onChange={(e) => setHorizon(e.target.value)}
+            className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm sm:w-64"
+          >
+            <option value="">Select…</option>
+            {HORIZONS.map((h) => (
+              <option key={h} value={h}>
+                {h}
+              </option>
+            ))}
+          </select>
         </div>
       </Section>
 
