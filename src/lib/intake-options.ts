@@ -47,6 +47,16 @@ export type InvestorSubmission = {
   id: string;
   investor_name: string;
   contact_email: string;
+  website?: string | null;
+  investor_type?: string | null;
+  countries?: string[] | null;
+  instruments?: string[] | null;
+  investment_horizon?: string | null;
+  screening_process?: string | null;
+  due_diligence_process?: string | null;
+  decision_process?: string | null;
+  required_documents?: string | null;
+  preferred_contact?: string | null;
   sectors: string[];
   sector_notes: string | null;
   stages: string[];
