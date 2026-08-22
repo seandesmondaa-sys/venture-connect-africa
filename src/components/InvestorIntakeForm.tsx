@@ -16,6 +16,7 @@ import {
   formatUsd,
   type InvestorSubmission,
 } from "@/lib/intake-options";
+import { HORIZONS, INSTRUMENTS, INVESTOR_TYPES } from "@/lib/ac-framework";
 import { submitInvestorIntake } from "@/lib/investors.functions";
 
 function Section({
