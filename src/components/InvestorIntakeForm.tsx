@@ -65,6 +65,13 @@ export function InvestorIntakeForm({
   const [regions, setRegions] = useState<string[]>([]);
   const [avoid, setAvoid] = useState("");
   const [process, setProcess] = useState("");
+  const [website, setWebsite] = useState("");
+  const [investorType, setInvestorType] = useState("");
+  const [instruments, setInstruments] = useState<string[]>([]);
+  const [horizon, setHorizon] = useState("");
+  const [dueDiligence, setDueDiligence] = useState("");
+  const [requiredDocuments, setRequiredDocuments] = useState("");
+  const [preferredContact, setPreferredContact] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
