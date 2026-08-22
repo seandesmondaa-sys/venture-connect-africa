@@ -110,6 +110,16 @@ export function InvestorIntakeForm({
           geographies_focus: regions,
           geographies_avoid: avoid.trim() || null,
           process_notes: process.trim() || null,
+          website: website.trim() || null,
+          investor_type: investorType || null,
+          countries: [],
+          instruments,
+          investment_horizon: horizon || null,
+          screening_process: null,
+          due_diligence_process: dueDiligence.trim() || null,
+          decision_process: null,
+          required_documents: requiredDocuments.trim() || null,
+          preferred_contact: preferredContact.trim() || null,
         },
       });
       onSubmitted(row as InvestorSubmission);
