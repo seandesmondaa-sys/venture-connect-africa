@@ -13,6 +13,16 @@ const submissionSchema = z.object({
   geographies_focus: z.array(z.string().max(60)).max(30),
   geographies_avoid: z.string().trim().max(500).nullish().transform((v) => v ?? null),
   process_notes: z.string().trim().max(1000).nullish().transform((v) => v ?? null),
+  website: z.string().trim().max(255).nullish().transform((v) => v || null),
+  investor_type: z.string().trim().max(80).nullish().transform((v) => v || null),
+  countries: z.array(z.string().max(60)).max(60).optional().default([]),
+  instruments: z.array(z.string().max(60)).max(20).optional().default([]),
+  investment_horizon: z.string().trim().max(60).nullish().transform((v) => v || null),
+  screening_process: z.string().trim().max(1000).nullish().transform((v) => v || null),
+  due_diligence_process: z.string().trim().max(1000).nullish().transform((v) => v || null),
+  decision_process: z.string().trim().max(1000).nullish().transform((v) => v || null),
+  required_documents: z.string().trim().max(1000).nullish().transform((v) => v || null),
+  preferred_contact: z.string().trim().max(255).nullish().transform((v) => v || null),
 });
 
 export type SubmissionInput = z.infer<typeof submissionSchema>;
