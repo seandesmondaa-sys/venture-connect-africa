@@ -158,6 +158,32 @@ export function InvestorIntakeForm({
               placeholder="deals@fund.com"
             />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="website">Website (optional)</Label>
+            <Input
+              id="website"
+              value={website}
+              maxLength={255}
+              onChange={(e) => setWebsite(e.target.value)}
+              placeholder="fund.com"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="investor-type">Investor type</Label>
+            <select
+              id="investor-type"
+              value={investorType}
+              onChange={(e) => setInvestorType(e.target.value)}
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="">Select…</option>
+              {INVESTOR_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </Section>
 
