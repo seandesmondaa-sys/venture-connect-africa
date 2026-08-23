@@ -107,9 +107,11 @@ function OpportunityPage() {
                 .join(" · ") || "Profile in progress"}
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={() => setShowInternal((v) => !v)}>
-            {showInternal ? "Hide" : "Show"} Auxilium controls
-          </Button>
+          {data.isStaff ? (
+            <Button variant="outline" size="sm" onClick={() => setShowInternal((v) => !v)}>
+              {showInternal ? "Hide" : "Show"} Auxilium controls
+            </Button>
+          ) : null}
         </div>
 
         <ScorePanel
