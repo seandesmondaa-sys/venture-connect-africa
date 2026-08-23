@@ -1,0 +1,1 @@
+DELETE FROM public.opportunities WHERE contact_email = 'founder@sahelsolar.test';
