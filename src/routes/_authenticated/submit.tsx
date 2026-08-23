@@ -9,7 +9,7 @@ const title = "Submit an Opportunity — AC Intelligence";
 const description =
   "Upload a pitch deck or answer a short conversational intake and receive an AI investment readiness assessment from AC Intelligence.";
 
-export const Route = createFileRoute("/submit")({
+export const Route = createFileRoute("/_authenticated/submit")({
   head: () => ({
     meta: [
       { title },

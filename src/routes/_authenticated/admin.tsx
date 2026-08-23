@@ -19,7 +19,7 @@ const title = "Auxilium Dashboard — AC Intelligence";
 const description =
   "Internal Auxilium Consult dashboard for opportunities, investor mandates, matches and workflow status.";
 
-export const Route = createFileRoute("/admin")({
+export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
       { title },
@@ -37,6 +37,34 @@ type Tab = "opportunities" | "investors" | "matches";
 function AdminPage() {
   const [tab, setTab] = useState<Tab>("opportunities");
   const [search, setSearch] = useState("");
+  const fetchAccess = useServerFn(getMyAccess);
+  const access = useQuery({ queryKey: ["my-access"], queryFn: () => fetchAccess() });
+
+  if (access.isPending) {
+    return (
+      <main className="grid min-h-screen place-items-center bg-background">
+        <p className="text-sm text-muted-foreground">Checking your access…</p>
+      </main>
+    );
+  }
+
+  if (!access.data?.isStaff) {
+    return (
+      <main className="grid min-h-screen place-items-center bg-background px-5">
+        <div className="max-w-md rounded-xl border border-border bg-card p-8 text-center card-elevated">
+          <h1 className="text-2xl">Auxilium team access only</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            This dashboard is restricted to the Auxilium Consult internal team. Ask an administrator
+            to grant your account access.
+          </p>
+          <Button asChild variant="gold" className="mt-6">
+            <Link to="/">Back to AC Intelligence</Link>
+          </Button>
+        </div>
+      </main>
+    );
+  }
+
 
   return (
     <main className="min-h-screen bg-background">

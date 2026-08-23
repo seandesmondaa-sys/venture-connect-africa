@@ -27,7 +27,7 @@ const title = "Opportunity Assessment — AC Intelligence";
 const description =
   "AI screening scores, investment readiness assessment, gap questions and investor matching for a submitted opportunity.";
 
-export const Route = createFileRoute("/opportunity/$id")({
+export const Route = createFileRoute("/_authenticated/opportunity/$id")({
   head: () => ({
     meta: [
       { title },
