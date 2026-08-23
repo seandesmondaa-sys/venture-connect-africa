@@ -1,18 +1,22 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
 const answersSchema = z.record(z.string(), z.string().max(4000));
 
 export const submitOpportunityIntake = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ answers: answersSchema }).parse(data))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const engine = await import("./opportunity-engine.server");
-    const id = await engine.createOpportunityFromAnswers(data.answers);
+    const id = await engine.createOpportunityFromAnswers(data.answers, context.userId);
     await engine.runScreening(id);
     return { opportunityId: id };
   });
 
 export const analyzePitchDeckUpload = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) =>
     z
       .object({
@@ -22,21 +26,28 @@ export const analyzePitchDeckUpload = createServerFn({ method: "POST" })
       })
       .parse(data),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const engine = await import("./opportunity-engine.server");
-    const id = await engine.analyzePitchDeck(data);
+    const id = await engine.analyzePitchDeck({ ...data, ownerUserId: context.userId });
     await engine.runScreening(id);
     return { opportunityId: id };
   });
 
 export const getOpportunity = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { requireOpportunityAccess } = await import("./authz.server");
+    const { staff } = await requireOpportunityAccess(context.userId, data.id);
     const engine = await import("./opportunity-engine.server");
-    return engine.getOpportunityDetail(data.id);
+    const detail = await engine.getOpportunityDetail(data.id);
+    // Internal-only material stays with the Auxilium team.
+    if (!staff) return { ...detail, matches: [], notes: [], audit: [], isStaff: false };
+    return { ...detail, isStaff: true };
   });
 
 export const answerFollowUps = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) =>
     z
       .object({
@@ -47,7 +58,9 @@ export const answerFollowUps = createServerFn({ method: "POST" })
       })
       .parse(data),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { requireOpportunityAccess } = await import("./authz.server");
+    await requireOpportunityAccess(context.userId, data.opportunityId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const engine = await import("./opportunity-engine.server");
 
@@ -85,50 +98,67 @@ export const answerFollowUps = createServerFn({ method: "POST" })
   });
 
 export const rescreenOpportunity = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { requireOpportunityAccess } = await import("./authz.server");
+    await requireOpportunityAccess(context.userId, data.id);
     const engine = await import("./opportunity-engine.server");
     await engine.runScreening(data.id);
     return { ok: true };
   });
 
 export const runInvestorMatching = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { requireStaff } = await import("./authz.server");
+    await requireStaff(context.userId);
     const engine = await import("./opportunity-engine.server");
     const count = await engine.generateMatches(data.id);
     return { count };
   });
 
-export const listOpportunities = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
-    .from("opportunities")
-    .select("*")
-    .order("submitted_at", { ascending: false })
-    .limit(500);
-  if (error) throw new Error(error.message);
-  return data ?? [];
-});
+export const listOpportunities = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { requireStaff } = await import("./authz.server");
+    await requireStaff(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("opportunities")
+      .select("*")
+      .order("submitted_at", { ascending: false })
+      .limit(500);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
 
-export const listAllMatches = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
-    .from("investor_matches")
-    .select(
-      "*, investor:investor_submissions(id, investor_name, investor_type), opportunity:opportunities(id, company_name, sector, country)",
-    )
-    .order("fit_score", { ascending: false })
-    .limit(500);
-  if (error) throw new Error(error.message);
-  return data ?? [];
-});
+export const listAllMatches = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { requireStaff } = await import("./authz.server");
+    await requireStaff(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("investor_matches")
+      .select(
+        "*, investor:investor_submissions(id, investor_name, investor_type), opportunity:opportunities(id, company_name, sector, country)",
+      )
+      .order("fit_score", { ascending: false })
+      .limit(500);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
 
 export const updateOpportunityStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) =>
     z.object({ id: z.string().uuid(), status: z.string().max(40) }).parse(data),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { requireStaff } = await import("./authz.server");
+    await requireStaff(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const engine = await import("./opportunity-engine.server");
     const { error } = await supabaseAdmin
@@ -141,6 +171,7 @@ export const updateOpportunityStatus = createServerFn({ method: "POST" })
   });
 
 export const overrideScores = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) =>
     z
       .object({
@@ -151,7 +182,9 @@ export const overrideScores = createServerFn({ method: "POST" })
       })
       .parse(data),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { requireStaff } = await import("./authz.server");
+    await requireStaff(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const engine = await import("./opportunity-engine.server");
     const { error } = await supabaseAdmin
@@ -172,6 +205,7 @@ export const overrideScores = createServerFn({ method: "POST" })
   });
 
 export const updateExtractedField = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) =>
     z
       .object({
@@ -183,7 +217,9 @@ export const updateExtractedField = createServerFn({ method: "POST" })
       })
       .parse(data),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { requireStaff } = await import("./authz.server");
+    await requireStaff(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const engine = await import("./opportunity-engine.server");
     const { data: row, error } = await supabaseAdmin
@@ -202,6 +238,7 @@ export const updateExtractedField = createServerFn({ method: "POST" })
   });
 
 export const addNote = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) =>
     z
       .object({
@@ -212,7 +249,9 @@ export const addNote = createServerFn({ method: "POST" })
       })
       .parse(data),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { requireStaff } = await import("./authz.server");
+    await requireStaff(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("entity_notes").insert({
       entity_type: data.entityType,
@@ -222,4 +261,11 @@ export const addNote = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+export const getMyAccess = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { isStaff } = await import("./authz.server");
+    return { userId: context.userId, isStaff: await isStaff(context.userId) };
   });

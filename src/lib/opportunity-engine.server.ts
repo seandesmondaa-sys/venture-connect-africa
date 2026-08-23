@@ -98,6 +98,7 @@ export async function analyzePitchDeck(input: {
   fileName: string;
   mimeType: string;
   base64: string;
+  ownerUserId: string;
 }) {
   const db = await admin();
 
@@ -128,7 +129,13 @@ export async function analyzePitchDeck(input: {
 
   const companyName = byKey.get("company_name")?.value ?? input.fileName.replace(/\.[^.]+$/, "");
 
-  const row: AnyRecord = { company_name: companyName, submission_method: "deck", status: "ai_screening" };
+  const row: AnyRecord = {
+    company_name: companyName,
+    submission_method: "deck",
+    status: "ai_screening",
+    owner_user_id: input.ownerUserId,
+  };
+
   for (const key of FIELD_KEYS) {
     if (key === "company_name") continue;
     const entry = byKey.get(key);
@@ -205,12 +212,16 @@ export async function analyzePitchDeck(input: {
 
 /* --------------------------- Conversational intake --------------------------- */
 
-export async function createOpportunityFromAnswers(answers: Record<string, string>) {
+export async function createOpportunityFromAnswers(
+  answers: Record<string, string>,
+  ownerUserId: string,
+) {
   const db = await admin();
   const row: AnyRecord = {
     company_name: answers["company_name"]?.trim() || "Unnamed opportunity",
     submission_method: "conversational",
     status: "ai_screening",
+    owner_user_id: ownerUserId,
   };
   for (const key of FIELD_KEYS) {
     if (key === "company_name") continue;

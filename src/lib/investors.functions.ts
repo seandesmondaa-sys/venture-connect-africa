@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
 const submissionSchema = z.object({
   investor_name: z.string().trim().min(1).max(160),
   contact_email: z.string().trim().email().max(255),
@@ -40,8 +42,12 @@ export const submitInvestorIntake = createServerFn({ method: "POST" })
     return row;
   });
 
-export const listInvestorSubmissions = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+export const listInvestorSubmissions = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { requireStaff } = await import("./authz.server");
+    await requireStaff(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await supabaseAdmin
     .from("investor_submissions")
     .select("*")
