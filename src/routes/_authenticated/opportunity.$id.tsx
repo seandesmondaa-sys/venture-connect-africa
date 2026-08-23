@@ -27,7 +27,7 @@ const title = "Opportunity Assessment — AC Intelligence";
 const description =
   "AI screening scores, investment readiness assessment, gap questions and investor matching for a submitted opportunity.";
 
-export const Route = createFileRoute("/opportunity/$id")({
+export const Route = createFileRoute("/_authenticated/opportunity/$id")({
   head: () => ({
     meta: [
       { title },
@@ -107,9 +107,11 @@ function OpportunityPage() {
                 .join(" · ") || "Profile in progress"}
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={() => setShowInternal((v) => !v)}>
-            {showInternal ? "Hide" : "Show"} Auxilium controls
-          </Button>
+          {data.isStaff ? (
+            <Button variant="outline" size="sm" onClick={() => setShowInternal((v) => !v)}>
+              {showInternal ? "Hide" : "Show"} Auxilium controls
+            </Button>
+          ) : null}
         </div>
 
         <ScorePanel
@@ -188,7 +190,7 @@ function OpportunityPage() {
           )}
         </section>
 
-        {showInternal ? (
+        {showInternal && data.isStaff ? (
           <section className="space-y-4 rounded-xl border border-border bg-secondary/40 p-6">
             <h2 className="text-xl">Auxilium internal controls</h2>
             <div className="flex flex-wrap items-center gap-3">
@@ -316,7 +318,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             AC <span className="text-gold">Intelligence</span>
           </Link>
           <Button asChild variant="onSurface" size="sm">
-            <Link to="/admin">Auxilium dashboard</Link>
+            <Link to="/submit">New opportunity</Link>
           </Button>
         </div>
       </header>

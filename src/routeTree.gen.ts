@@ -10,19 +10,25 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as InvestorsRouteImport } from './routes/investors'
-import { Route as SubmitRouteImport } from './routes/submit'
-import { Route as OpportunityIdRouteImport } from './routes/opportunity.$id'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedSubmitRouteImport } from './routes/_authenticated/submit'
+import { Route as AuthenticatedOpportunityIdRouteImport } from './routes/_authenticated/opportunity.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InvestorsRoute = InvestorsRouteImport.update({
@@ -30,54 +36,71 @@ const InvestorsRoute = InvestorsRouteImport.update({
   path: '/investors',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SubmitRoute = SubmitRouteImport.update({
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSubmitRoute = AuthenticatedSubmitRouteImport.update({
   id: '/submit',
   path: '/submit',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const OpportunityIdRoute = OpportunityIdRouteImport.update({
-  id: '/opportunity/$id',
-  path: '/opportunity/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const AuthenticatedOpportunityIdRoute =
+  AuthenticatedOpportunityIdRouteImport.update({
+    id: '/opportunity/$id',
+    path: '/opportunity/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
   '/investors': typeof InvestorsRoute
-  '/submit': typeof SubmitRoute
-  '/opportunity/$id': typeof OpportunityIdRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/submit': typeof AuthenticatedSubmitRoute
+  '/opportunity/$id': typeof AuthenticatedOpportunityIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
   '/investors': typeof InvestorsRoute
-  '/submit': typeof SubmitRoute
-  '/opportunity/$id': typeof OpportunityIdRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/submit': typeof AuthenticatedSubmitRoute
+  '/opportunity/$id': typeof AuthenticatedOpportunityIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/investors': typeof InvestorsRoute
-  '/submit': typeof SubmitRoute
-  '/opportunity/$id': typeof OpportunityIdRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/submit': typeof AuthenticatedSubmitRoute
+  '/_authenticated/opportunity/$id': typeof AuthenticatedOpportunityIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/investors' | '/submit' | '/opportunity/$id'
+  fullPaths:
+    '/' | '/auth' | '/investors' | '/admin' | '/submit' | '/opportunity/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/investors' | '/submit' | '/opportunity/$id'
+  to: '/' | '/auth' | '/investors' | '/admin' | '/submit' | '/opportunity/$id'
   id:
-    '__root__' | '/' | '/admin' | '/investors' | '/submit' | '/opportunity/$id'
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/investors'
+    | '/_authenticated/admin'
+    | '/_authenticated/submit'
+    | '/_authenticated/opportunity/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   InvestorsRoute: typeof InvestorsRoute
-  SubmitRoute: typeof SubmitRoute
-  OpportunityIdRoute: typeof OpportunityIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -89,11 +112,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/investors': {
@@ -103,29 +133,50 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InvestorsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/submit': {
-      id: '/submit'
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/submit': {
+      id: '/_authenticated/submit'
       path: '/submit'
       fullPath: '/submit'
-      preLoaderRoute: typeof SubmitRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedSubmitRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/opportunity/$id': {
-      id: '/opportunity/$id'
+    '/_authenticated/opportunity/$id': {
+      id: '/_authenticated/opportunity/$id'
       path: '/opportunity/$id'
       fullPath: '/opportunity/$id'
-      preLoaderRoute: typeof OpportunityIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedOpportunityIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedSubmitRoute: typeof AuthenticatedSubmitRoute
+  AuthenticatedOpportunityIdRoute: typeof AuthenticatedOpportunityIdRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedSubmitRoute: AuthenticatedSubmitRoute,
+  AuthenticatedOpportunityIdRoute: AuthenticatedOpportunityIdRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   InvestorsRoute: InvestorsRoute,
-  SubmitRoute: SubmitRoute,
-  OpportunityIdRoute: OpportunityIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
