@@ -13,7 +13,7 @@ import {
 } from "@/lib/ac-framework";
 import { formatUsd, type InvestorSubmission } from "@/lib/intake-options";
 import { listInvestorSubmissions } from "@/lib/investors.functions";
-import { listAllMatches, listOpportunities } from "@/lib/opportunities.functions";
+import { getMyAccess, listAllMatches, listOpportunities } from "@/lib/opportunities.functions";
 
 const title = "Auxilium Dashboard — AC Intelligence";
 const description =
