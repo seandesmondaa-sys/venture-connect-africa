@@ -190,7 +190,7 @@ function OpportunityPage() {
           )}
         </section>
 
-        {showInternal ? (
+        {showInternal && data.isStaff ? (
           <section className="space-y-4 rounded-xl border border-border bg-secondary/40 p-6">
             <h2 className="text-xl">Auxilium internal controls</h2>
             <div className="flex flex-wrap items-center gap-3">
@@ -318,7 +318,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             AC <span className="text-gold">Intelligence</span>
           </Link>
           <Button asChild variant="onSurface" size="sm">
-            <Link to="/admin">Auxilium dashboard</Link>
+            <Link to="/submit">New opportunity</Link>
           </Button>
         </div>
       </header>
