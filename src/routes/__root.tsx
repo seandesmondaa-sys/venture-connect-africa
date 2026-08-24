@@ -108,6 +108,15 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
+        {/* TanStack Start's client RPC reads process.env.TSS_SERVER_FN_BASE, which the dev
+            server injects as a global. Ensure the object exists before any module runs so a
+            load-order race can't blank the page with "process is not defined". */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "globalThis.process=globalThis.process||{};globalThis.process.env=globalThis.process.env||{};",
+          }}
+        />
         <HeadContent />
       </head>
       <body>
@@ -117,6 +126,7 @@ function RootShell({ children }: { children: ReactNode }) {
     </html>
   );
 }
+
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
