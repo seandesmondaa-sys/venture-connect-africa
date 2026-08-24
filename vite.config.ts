@@ -12,4 +12,13 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    optimizeDeps: {
+      // These read process.env.TSS_SERVER_FN_BASE, which Vite only provides to source
+      // modules in dev. Pre-bundled copies can execute before that shim is installed and
+      // crash the browser with "process is not defined" on routes that import server fns.
+      exclude: ["@tanstack/start-client-core", "@tanstack/react-start"],
+    },
+  },
 });
+
