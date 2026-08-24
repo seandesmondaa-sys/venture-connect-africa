@@ -12,4 +12,17 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    // These packages read process.env.TSS_SERVER_FN_BASE, which Vite's `define` replaces
+    // only for source files — pre-bundled deps would keep the literal `process` reference
+    // and crash the browser with "process is not defined".
+    optimizeDeps: {
+      exclude: [
+        "@tanstack/start-client-core",
+        "@tanstack/react-start",
+        "@tanstack/react-start-client",
+      ],
+    },
+  },
 });
+
